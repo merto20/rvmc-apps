@@ -6,11 +6,27 @@
 
 ## Development server
 
-Run `nx serve TravelEasy` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+Run `npm run dev` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+
+## Start Production server
+
+Run `npm run start` for a prod server.
+
+## Build Production
+
+Run `npm run build`
+
+## Unit test and linting
+
+Run `npm run test-lint`
+
+## Unit test and linting in CI server
+
+Run `npm run test-lint-ci`
 
 ## Understand this workspace
 
-Run `nx graph` to see a diagram of the dependencies of the projects.
+Run `npx nx graph` to see a diagram of the dependencies of the projects.
 
 ## Remote caching
 

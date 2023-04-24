@@ -2,7 +2,13 @@
   "name": "rvmc-apps",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "dev": "npx nx serve travel-easy",
+    "build": "npx nx build travel-easy",
+    "start": "npx nx serve travel-easy -c production",
+    "test-lint": "npx nx run-many --target=test,lint --all --nx-bail",
+    "test-lint-ci": "npx nx affected --target=test,lint --parallel=3 -- --runInBand --configuration=ci"
+  },
   "private": true,
   "dependencies": {
     "@nrwl/next": "15.9.2",
