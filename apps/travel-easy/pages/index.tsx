@@ -1,0 +1,11 @@
+
+
+export function Index() {
+  return (
+    <section className="p-5">
+      <h1 className="text-red-700">Welcome</h1>
+    </section>
+  );
+}
+
+export default Index;
