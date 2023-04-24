@@ -18,11 +18,19 @@ Run `npm run build`
 
 ## Unit test and linting
 
-Run `npm run test-lint`
+Run `npm run test-lint` to run Unit test and Linting
 
 ## Unit test and linting in CI server
 
-Run `npm run test-lint-ci`
+Run `npm run test-lint-ci` to run Unit test and Linting in CI Server
+
+## Build Container
+
+Run `docker build --tag rvmc-apps:latest .` to build docker container
+
+## Run docker container
+
+Run `docker run -p 3000:3000 rvmc-apps` to run docker container in port 3000
 
 ## Understand this workspace
 

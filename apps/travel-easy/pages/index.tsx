@@ -1,4 +1,5 @@
-
+import path from 'path';
+path.resolve('./next.config.js');
 
 export function Index() {
   return (
