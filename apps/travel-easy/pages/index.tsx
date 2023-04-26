@@ -44,9 +44,6 @@ export function Index({
 
   const onSetDateTime = useCallback((value: Dayjs) => {
     setDateTime(value.format('YYYY-MM-DD[T]HH:mm:ss'));
-  }, []);
-
-  const onSetDate = useCallback((value: Dayjs) => {
     setDate(value.format('YYYY-MM-DD'));
   }, []);
 
@@ -64,7 +61,6 @@ export function Index({
         <div className='grid md:grid-cols-3 sm:grid-cols-1 gap-4'>
           <div className="md:col-span-2 sm:col-span-1 flex gap-5 justify-start">
             <DateTimePicker value={dayjs(dateTime, 'YYYY-MM-DD[T]HH:mm:ss')} label="Date Time" onChange={onSetDateTime}/>
-            <DatePicker value={dayjs(date, 'YYYY-MM-DD')} label="Date" onChange={onSetDate}/>
             <Button variant="outlined" onClick={() => setSearchCounter(searchCounter + 1)}>Search</Button>
           </div>
           <div className="md:col-span-2 sm:col-span-1 overflow-y-auto md:h-[500px] h-[300px]">
