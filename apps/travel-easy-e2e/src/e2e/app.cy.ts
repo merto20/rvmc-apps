@@ -1,13 +1,8 @@
-import { getGreeting } from "../support/app.po";
-
 describe("travel-easy", () => {
-  beforeEach(() => cy.visit("/"));
+  beforeEach(() => cy.visit("/?date_time=2023-04-25T03%3A00%3A00&date=2023-04-25"));
 
-  it("should display welcome message", () => {
-    // Custom command example, see `../support/commands.ts` file
-    cy.login("my-email@something.com", "myPassword");
-
-    // Function helper example, see `../support/app.po.ts` file
-    getGreeting().contains("Welcome travel-easy");
+  it("should display locations", () => {
+    cy.get('input').first().should('have.value', '04/25/2023⁩ ⁦03:00⁩ ⁦AM');
+    cy.get('ul > div > div > span').first().should('have.html', 'Ang Mo Kio');
   });
 });

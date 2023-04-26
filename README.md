@@ -32,6 +32,15 @@ Run `docker build --tag rvmc-apps:latest .` to build docker container
 
 Run `docker run -p 3000:3000 rvmc-apps` to run docker container in port 3000
 
+## Open Cypress UI application for integration testing
+
+Run `npx nx run travel-easy-e2e:e2e --watch` to open Cypress application
+
+## Run Cypress Integration Test in command line
+
+Run `npx nx run travel-easy-e2e:e2e` to execute integration testing in command line. 
+This is useful when running e2e in CI server.
+
 ## Understand this workspace
 
 Run `npx nx graph` to see a diagram of the dependencies of the projects.
