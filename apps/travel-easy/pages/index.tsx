@@ -1,73 +1,117 @@
 import path from 'path';
-import { SetStateAction, useCallback, useEffect, useState } from 'react';
-import { WeatherForecast } from '@rvmc-apps/shared-types';
-import { ListLocation } from '@rvmc-apps/ui-components';
-import { List, ListItemButton, ListItemText, ListSubheader, TextField } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
+import { AreaMetadata, CameraData, TrafficImages, WeatherForecast } from '@rvmc-apps/shared-types';
+import { ListLocation, ActionAreaCard, TrafficImageList } from '@rvmc-apps/ui-components';
+import { Button, TextField, Typography } from '@mui/material';
+import { getLocationName, fetchWeatherForecastData, fetchTrafficImagesData } from '@rvmc-apps/common-util';
+import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
 
 path.resolve('./next.config.js');
 
-export function Index({ dt, d, data: initialData }: { dt: string; d: string; data: WeatherForecast }) {
+export function Index({
+  dt,
+  d,
+  weatherData: initialWeatherData,
+  trafficData: initialTrafficData,
+}: {
+  dt: string;
+  d: string;
+  weatherData: WeatherForecast;
+  trafficData: TrafficImages;
+}) {
   const [dateTime, setDateTime] = useState(dt);
   const [date, setDate] = useState(d);
-  const [weatherData, setWetherForecast] = useState<WeatherForecast>(initialData);
+  const [weatherData, setWetherForecast] = useState<WeatherForecast>(initialWeatherData);
+  const [trafficImages, setTrafficImages] = useState<TrafficImages>(initialTrafficData);
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [forecast, setForecast] = useState('');
+  const [selectedCameraData, setSelectedCameraData] = useState<CameraData[]>([]);
+  const [searchCounter, setSearchCounter] = useState(0);
 
   useEffect(() => {
-    if (dateTime && date) {
-      fetch(
-        `https://api.data.gov.sg/v1/environment/2-hour-weather-forecast?date_time=${encodeURIComponent(dateTime)}&date=${encodeURIComponent(date)}`,
-      )
-        .then(resp => resp.json())
-        .then(data => setWetherForecast(data));
-    } else {
-      fetch('https://api.data.gov.sg/v1/environment/2-hour-weather-forecast')
-        .then(resp => resp.json())
-        .then(data => setWetherForecast(data));
-    }
-  }, [dateTime, date]);
+    const promiseList = [
+      fetchWeatherForecastData(dateTime, date),
+      fetchTrafficImagesData(dateTime),
+    ];
+    Promise.all(promiseList).then(async responses => {
+      const weatherData: WeatherForecast = await responses[0].json();
+      const trafficData: TrafficImages = populateLocationName(await responses[1].json(), weatherData.area_metadata);
+      setWetherForecast(weatherData);
+      setTrafficImages(trafficData);
+    });
+  }, [searchCounter]);
 
-  const onSetDateTime = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
-    setDateTime(evt.target.value);
+  const onSetDateTime = useCallback((value: Dayjs) => {
+    setDateTime(value.format('YYYY-MM-DD[T]HH:mm:ss'));
   }, []);
 
-  const onSetDate = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(evt.target.value);
+  const onSetDate = useCallback((value: Dayjs) => {
+    setDate(value.format('YYYY-MM-DD'));
   }, []);
+
+  const onSelectedChanged = (area: AreaMetadata) => {
+    setSelectedLocation(area.name);
+    const forecast = weatherData.items[0]?.forecasts.find(f => f.area === area.name);
+    if (forecast) setForecast(forecast.forecast);
+    const images = trafficImages.items[0].cameras.filter(c => c.area === area.name);
+    setSelectedCameraData(images);
+  };
 
   return (
-    <section className="py-20 flex text-center justify-center h-screen w-full">
-      <div className='w-[896px] shadow-2xl'>
-        <div className='p-5 flex gap-5'>
-          <TextField value={dateTime} onChange={onSetDateTime} label="Date Time" variant="filled" />
-          <TextField value={date} onChange={onSetDate} label="Date" variant="filled" />
-        </div>
-        <div className='overflow-y-auto h-[85%] w-1/2'>
-          <ListLocation areaMetadata={weatherData?.area_metadata} onSelectedChanged={(area: SetStateAction<string>) => setSelectedLocation(area)}></ListLocation>
+    <section className="py-20 px-10 flex text-center justify-center h-screen w-full">
+      <div className="w-[896px]">
+        <div className='grid md:grid-cols-3 sm:grid-cols-1 gap-4'>
+          <div className="md:col-span-2 sm:col-span-1 flex gap-5 justify-start">
+            <DateTimePicker value={dayjs(dateTime, 'YYYY-MM-DD[T]HH:mm:ss')} label="Date Time" onChange={onSetDateTime}/>
+            <DatePicker value={dayjs(date, 'YYYY-MM-DD')} label="Date" onChange={onSetDate}/>
+            <Button variant="outlined" onClick={() => setSearchCounter(searchCounter + 1)}>Search</Button>
+          </div>
+          <div className="md:col-span-2 sm:col-span-1 overflow-y-auto md:h-[500px] h-[300px]">
+            <ListLocation areaMetadata={weatherData?.area_metadata} onSelectedChanged={onSelectedChanged}></ListLocation>
+          </div>
+          {selectedLocation && (
+            <>
+              <div className='sm:col-span-1'>
+                <ActionAreaCard area={selectedLocation} forecast={forecast}></ActionAreaCard>
+              </div>
+              <div className='md:col-span-2 sm:col-span-1'>
+                <Typography gutterBottom variant="h5" component="div">
+                  Traffic Situation in {selectedLocation}
+                </Typography>
+                <TrafficImageList images={selectedCameraData}></TrafficImageList>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-export async function getServerSideProps(context) {
-  let data!: WeatherForecast;
-  if (context.query.date_time && context.query.date) {
-    const res = await fetch(
-      `https://api.data.gov.sg/v1/environment/2-hour-weather-forecast?date_time=${encodeURIComponent(
-        context.query.date_time,
-      )}&date=${encodeURIComponent(context.query.date)}`,
-    );
-    data = await res.json();
-  } else {
-    const res = await fetch('https://api.data.gov.sg/v1/environment/2-hour-weather-forecast');
-    data = await res.json();
-  }
+function populateLocationName(trafficData: TrafficImages, areaMetaData: AreaMetadata[]) {
+  trafficData.items[0].cameras.forEach(async c => {
+    c.area = await getLocationName(c.location, areaMetaData)
+  });
+  return trafficData;
+}
+
+export async function getServerSideProps(context: { query: { date_time: string; date: string} }) {
+  const promiseList = [
+    fetchWeatherForecastData(context.query.date_time, context.query.date),
+    fetchTrafficImagesData(context.query.date_time),
+  ];
+
+  const responses = await Promise.all(promiseList);
+  const weatherData: WeatherForecast = await responses[0].json();
+  const trafficData: TrafficImages = populateLocationName(await responses[1].json(), weatherData.area_metadata);
 
   return {
     props: {
       dt: context.query.date_time ?? '',
       d: context.query.date ?? '',
-      data,
+      weatherData: weatherData,
+      trafficData: trafficData,
     },
   };
 }

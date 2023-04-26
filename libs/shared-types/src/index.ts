@@ -1,2 +1,2 @@
-export * from './lib/shared-types';
-export * from './lib/weather-forecast';
+export * from './lib/weather-forecast.model';
+export * from './lib/traffic-images.model';

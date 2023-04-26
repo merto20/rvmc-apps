@@ -18,6 +18,14 @@ const nextConfig = {
     // See: https://github.com/nrwl/nx/issues/9017
     outputFileTracingRoot: path.join(__dirname, '../../'),
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.data.gov.sg',
+      },
+    ],
+  },
 };
 
 module.exports = withNx(nextConfig);
