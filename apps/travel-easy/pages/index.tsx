@@ -47,6 +47,10 @@ export function Index({
     setDate(value.format('YYYY-MM-DD'));
   }, []);
 
+  const onSearch = useCallback(() => {
+    setSearchCounter(searchCounter + 1);
+  }, [dateTime]);
+
   const onSelectedChanged = (area: AreaMetadata) => {
     setSelectedLocation(area.name);
     const forecast = weatherData.items[0]?.forecasts.find(f => f.area === area.name);
@@ -61,7 +65,7 @@ export function Index({
         <div className='grid md:grid-cols-3 sm:grid-cols-1 gap-4'>
           <div className="md:col-span-2 sm:col-span-1 flex gap-5 justify-start">
             <DateTimePicker value={dayjs(dateTime, 'YYYY-MM-DD[T]HH:mm:ss')} label="Date Time" onChange={onSetDateTime}/>
-            <Button variant="outlined" onClick={() => setSearchCounter(searchCounter + 1)}>Search</Button>
+            <Button variant="outlined" onClick={onSearch}>Search</Button>
           </div>
           <div className="md:col-span-2 sm:col-span-1 overflow-y-auto md:h-[500px] h-[300px]">
             <ListLocation areaMetadata={weatherData?.area_metadata} onSelectedChanged={onSelectedChanged}></ListLocation>
