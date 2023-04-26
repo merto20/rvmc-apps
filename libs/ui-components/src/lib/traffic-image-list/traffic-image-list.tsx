@@ -6,7 +6,6 @@ import PhotoCameraFrontIcon from '@mui/icons-material/PhotoCameraFront';
 import Image from 'next/image';
 import { CameraData } from '@rvmc-apps/shared-types';
 
-/* eslint-disable-next-line */
 export interface TrafficImageListProps {
   images: CameraData[]
 }

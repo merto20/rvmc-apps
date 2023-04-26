@@ -12,10 +12,10 @@ export async function getLocationName(location: Location, areaMetaData: AreaMeta
   return matched?.name;
 }
 
-export function fetchWeatherForecastData(dateTime: string, date: string) {
-  if (dateTime && date) {
+export function fetchWeatherForecastData(dateTime: string) {
+  if (dateTime) {
     return fetch(
-      `https://api.data.gov.sg/v1/environment/2-hour-weather-forecast?date_time=${encodeURIComponent(dateTime)}&date=${encodeURIComponent(date)}`,
+      `https://api.data.gov.sg/v1/environment/2-hour-weather-forecast?date_time=${encodeURIComponent(dateTime)}`
     );
   } else {
     return fetch('https://api.data.gov.sg/v1/environment/2-hour-weather-forecast');

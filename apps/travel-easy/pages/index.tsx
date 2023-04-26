@@ -2,28 +2,23 @@ import path from 'path';
 import { useCallback, useEffect, useState } from 'react';
 import { AreaMetadata, CameraData, TrafficImages, WeatherForecast } from '@rvmc-apps/shared-types';
 import { ListLocation, ActionAreaCard, TrafficImageList } from '@rvmc-apps/ui-components';
-import { Button, TextField, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { getLocationName, fetchWeatherForecastData, fetchTrafficImagesData } from '@rvmc-apps/common-util';
-import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
+import { DateTimePicker } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 
 path.resolve('./next.config.js');
 
-export function Index({
-  dt,
-  d,
-  weatherData: initialWeatherData,
-  trafficData: initialTrafficData,
-}: {
-  dt: string;
-  d: string;
+export interface IndexProps {
+  dateTime: string;
   weatherData: WeatherForecast;
   trafficData: TrafficImages;
-}) {
-  const [dateTime, setDateTime] = useState(dt);
-  const [date, setDate] = useState(d);
-  const [weatherData, setWetherForecast] = useState<WeatherForecast>(initialWeatherData);
-  const [trafficImages, setTrafficImages] = useState<TrafficImages>(initialTrafficData);
+}
+
+export function Index(props: IndexProps) {
+  const [dateTime, setDateTime] = useState(props.dateTime);
+  const [weatherData, setWetherForecast] = useState<WeatherForecast>(props.weatherData);
+  const [trafficImages, setTrafficImages] = useState<TrafficImages>(props.trafficData);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [forecast, setForecast] = useState('');
   const [selectedCameraData, setSelectedCameraData] = useState<CameraData[]>([]);
@@ -31,7 +26,7 @@ export function Index({
 
   useEffect(() => {
     const promiseList = [
-      fetchWeatherForecastData(dateTime, date),
+      fetchWeatherForecastData(dateTime),
       fetchTrafficImagesData(dateTime),
     ];
     Promise.all(promiseList).then(async responses => {
@@ -44,7 +39,6 @@ export function Index({
 
   const onSetDateTime = useCallback((value: Dayjs) => {
     setDateTime(value.format('YYYY-MM-DD[T]HH:mm:ss'));
-    setDate(value.format('YYYY-MM-DD'));
   }, []);
 
   const onSearch = useCallback(() => {
@@ -96,20 +90,18 @@ function populateLocationName(trafficData: TrafficImages, areaMetaData: AreaMeta
   return trafficData;
 }
 
-export async function getServerSideProps(context: { query: { date_time: string; date: string} }) {
+export async function getServerSideProps(context) {
   const promiseList = [
-    fetchWeatherForecastData(context.query.date_time, context.query.date),
+    fetchWeatherForecastData(context.query.date_time),
     fetchTrafficImagesData(context.query.date_time),
   ];
-
   const responses = await Promise.all(promiseList);
   const weatherData: WeatherForecast = await responses[0].json();
   const trafficData: TrafficImages = populateLocationName(await responses[1].json(), weatherData.area_metadata);
 
   return {
     props: {
-      dt: context.query.date_time ?? '',
-      d: context.query.date ?? '',
+      dateTime: context.query.date_time ?? '',
       weatherData: weatherData,
       trafficData: trafficData,
     },
